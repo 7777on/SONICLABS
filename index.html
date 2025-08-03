@@ -3,72 +3,128 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>SONICLAB® – El Laboratorio de Hits</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SONICLAB®</title>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #f5f5f5; padding: 40px; }
-    h1 { font-size: 3rem; color: #00ffcc; }
-    h2 { font-size: 1.8rem; color: #00ccaa; margin-top: 40px; }
-    .tag { background: #111; color: #0ff; font-size: 0.8rem; padding: 4px 8px; margin-left: 10px; border-radius: 4px; }
-    textarea, input, button { width: 100%; padding: 12px; margin-top: 10px; font-size: 16px; background: #1c1c1c; color: white; border: 1px solid #333; border-radius: 6px; }
-    button { background-color: #00ff88; font-weight: bold; cursor: pointer; }
-    button:hover { background-color: #00cc6a; }
-    .result { margin-top: 15px; padding: 20px; background: #141414; border-radius: 10px; }
-    audio { margin-top: 10px; display: block; }
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+    }
+    header {
+      background-color: #1f1f1f;
+      padding: 30px;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      color: #00ffc3;
+      text-shadow: 2px 2px 5px rgba(0,255,200,0.3);
+    }
+    main {
+      padding: 40px;
+      max-width: 960px;
+      margin: auto;
+    }
+    section {
+      background: #1c1c1c;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 12px rgba(0,255,200,0.1);
+    }
+    section h2 {
+      color: #00ffc3;
+    }
+    textarea, input[type="file"], button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: none;
+      background: #2a2a2a;
+      color: white;
+    }
+    button {
+      background-color: #00ffc3;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #00c9a7;
+    }
+    .result {
+      margin-top: 15px;
+      background: #151515;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    footer {
+      background: #1f1f1f;
+      padding: 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #888;
+    }
   </style>
 </head>
 <body>
+  <header>
+    <h1>SONICLAB®</h1>
+    <p>La plataforma de IA para artistas que quieren sonar como leyenda.</p>
+  </header>
+  <main>
+    <section>
+      <h2>🎧 Letras AI - Generador Pro</h2>
+      <textarea placeholder="Escribe una idea o estilo de letra..."></textarea>
+      <button>Generar Letra</button>
+      <div class="result">"Desde abajo, sin cadenas, volando con fuego en las venas..."</div>
+    </section>
 
-<h1>🔥 SONICLAB® – El Laboratorio de Hits 🔥</h1>
-<p>Bienvenido al centro creativo más potente del mundo musical IA. Aquí nacen los próximos himnos globales.</p>
+    <section>
+      <h2>🔊 Análisis de Mezcla Nivel Grammy</h2>
+      <input type="file" accept="audio/*">
+      <button>Analizar Mezcla</button>
+      <div class="result">Ecualización recomendada en 3.5 kHz, compresión paralela en el bombo. Estilo: Serban Ghenea.</div>
+    </section>
 
-<h2>🧠 Generador de Letras IA <span class="tag">FREE + TODOS LOS PLANES</span></h2>
-<textarea placeholder="Ej: Letra estilo Kendrick sobre crecer en el barrio..."></textarea>
-<button>Generar Letra</button>
-<div class="result">“Desde la esquina donde el sol se esconde, crecí esquivando sombras con fe de hombre...”</div>
+    <section>
+      <h2>🎬 Visuales AI Exportables</h2>
+      <textarea placeholder="Describe tu visual (ej: loop neón glitch urbano)..."></textarea>
+      <button>Generar Visual</button>
+      <div class="result">Loop visual generado: descargable desde downloads/visual01.mp4</div>
+    </section>
 
-<h2>🎧 Análisis Profesional de Mezcla IA <span class="tag">FREE + PRO</span></h2>
-<input type="file" accept="audio/*">
-<button>Subir y Analizar</button>
-<div class="result">Feedback de ‘Serban Ghenea IA’: Tu voz principal necesita reducción en 250Hz y presencia en 6kHz. Añadir slap delay para más cuerpo.</div>
+    <section>
+      <h2>🔁 Loop Instrumental IA</h2>
+      <textarea placeholder="Género, bpm, emoción..."></textarea>
+      <button>Generar Loop</button>
+      <div class="result">Loop generado: descargable desde downloads/loop01.wav</div>
+    </section>
 
-<h2>🎨 Visuales IA – Portadas & Loops <span class="tag">DEMO GRATIS</span></h2>
-<textarea placeholder="Ej: Loop de sintetizadores en neón púrpura estilo Blade Runner..."></textarea>
-<button>Generar Visual</button>
-<div class="result">Visual IA simulada: Loop en tonalidades púrpura neón con partículas lentas y lluvia digital, inspirado en estética 80s cyberpunk.</div>
+    <section>
+      <h2>🎙️ Voz Narrador IA (Texto a Voz)</h2>
+      <textarea id="ttsText" placeholder="Texto a convertir en voz..."></textarea>
+      <button onclick="speak()">Reproducir Voz</button>
+      <audio id="vozIA" controls></audio>
+    </section>
+  </main>
+  <footer>
+    SONICLAB® 2025 – Dominando la industria desde el navegador.
+  </footer>
 
-<h2>🎬 Videoclip Generator IA <span class="tag">BÁSICO +</span></h2>
-<textarea placeholder="Ej: Modelo bailando sobre fondo blanco con glitch urbano..."></textarea>
-<button>Generar Escena</button>
-<div class="result">Dirección IA estilo Hiro Murai: cámara lenta, contraste blanco vs glitch rojo. Coreografía urbana con iluminación LED lateral.</div>
-
-<h2>🧬 Branding Generator IA <span class="tag">FREE + TODOS</span></h2>
-<textarea placeholder="Ej: Proyecto trap melódico inspirado en los 2000’s con estética high-end..."></textarea>
-<button>Crear Marca</button>
-<div class="result">Propuesta: Nombre = “NOVA WAVE”. Paleta: negro obsidiana + verde ácido. Mood = Kanye x Weeknd visual hybrid.</div>
-
-<h2>🔊 Narrador IA – Voz Sintética <span class="tag">ACTIVO</span></h2>
-<textarea id="ttsText" placeholder="Ej: Bienvenido a SONICLAB, donde nacen los himnos del futuro..."></textarea>
-<button onclick="speak()">Reproducir Voz</button>
-<audio id="vozIA" controls></audio>
-
-<script>
-function speak() {
-  const text = document.getElementById("ttsText").value;
-  const voice = new SpeechSynthesisUtterance(text);
-  voice.lang = "es-ES";
-  speechSynthesis.speak(voice);
-}
-</script>
-
-<h2>🚀 Estrategia de Marketing Inteligente</h2>
-<div class="result">
-  <ul>
-    <li><b>FREE:</b> Acceso a Branding + Visual + Letra IA. CTA: “¿Listo para tu primer EP?”</li>
-    <li><b>BÁSICO:</b> Suma videoclip + estilo artista. CTA: “Visualizá tu hit en 3 clicks.”</li>
-    <li><b>PRO:</b> Diagnóstico experto mezcla IA. CTA: “¿Tu mezcla suena a estudio? Descúbrelo.”</li>
-    <li><b>ELITE:</b> Todo junto. Feedback como un team de Grammy winners. CTA: “Convertite en leyenda.”</li>
-  </ul>
-</div>
-
+  <script>
+    function speak() {
+      const text = document.getElementById("ttsText").value;
+      const voice = new SpeechSynthesisUtterance(text);
+      voice.lang = "es-ES";
+      speechSynthesis.speak(voice);
+    }
+  </script>
 </body>
 </html>
