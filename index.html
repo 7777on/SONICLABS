@@ -1,130 +1,1249 @@
-
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SONICLAB®</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Arial', sans-serif;
-      background-color: #121212;
-      color: #ffffff;
-    }
-    header {
-      background-color: #1f1f1f;
-      padding: 30px;
-      text-align: center;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 2.5rem;
-      color: #00ffc3;
-      text-shadow: 2px 2px 5px rgba(0,255,200,0.3);
-    }
-    main {
-      padding: 40px;
-      max-width: 960px;
-      margin: auto;
-    }
-    section {
-      background: #1c1c1c;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 30px;
-      box-shadow: 0 0 12px rgba(0,255,200,0.1);
-    }
-    section h2 {
-      color: #00ffc3;
-    }
-    textarea, input[type="file"], button {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: none;
-      background: #2a2a2a;
-      color: white;
-    }
-    button {
-      background-color: #00ffc3;
-      color: black;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    button:hover {
-      background-color: #00c9a7;
-    }
-    .result {
-      margin-top: 15px;
-      background: #151515;
-      padding: 15px;
-      border-radius: 8px;
-    }
-    footer {
-      background: #1f1f1f;
-      padding: 20px;
-      text-align: center;
-      font-size: 14px;
-      color: #888;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SonicLab - Forja tus Hits</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- jsPDF Library for PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- MIDI Writer JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/midi-writer-js@2.1.4/build/MidiWriter.min.js"></script>
+
+    <style>
+        /* Estilos personalizados y configuración de Tailwind */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #e0e0e0;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #F59E0B, #FF1B6B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-glow {
+            box-shadow: 0 0 100px 30px rgba(255, 27, 107, 0.3);
+        }
+        .card-bg {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #F59E0B, #FF1B6B);
+            color: #000;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 27, 107, 0.4);
+        }
+        .btn-secondary {
+            background-color: transparent;
+            border: 2px solid #FF1B6B;
+            color: #FF1B6B;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #FF1B6B;
+            color: #fff;
+        }
+        .btn-featured {
+            background-color: #F59E0B;
+            color: #000;
+        }
+         .btn-featured:hover {
+            background-color: #FBBF24;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(245, 158, 11, 0.4);
+        }
+        .featured-plan { 
+            border: 2px solid #F59E0B; 
+            transform: scale(1.05); 
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
+        }
+        .modal-backdrop {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-backdrop.active {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-content {
+            background-color: #111;
+            padding: 2rem;
+            border: 1px solid #FF1B6B;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 1rem;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-backdrop.active .modal-content {
+            transform: scale(1);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .loader { border: 4px solid #4B5563; border-top: 4px solid #FF1B6B; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .disabled-tool { opacity: 0.6; }
+        .locked-overlay {
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem;
+            cursor: pointer;
+        }
+        #tool-modal-output {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            white-space: normal;
+        }
+        #tool-modal-output h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #F59E0B;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        #tool-modal-output ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        #tool-modal-output li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        #tool-modal-output li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #FF1B6B;
+        }
+        #tool-modal-output strong {
+            color: #e0e0e0;
+            font-weight: 600;
+        }
+        .audio-controls button, .download-stem-button {
+            background-color: #FF1B6B;
+            color: white;
+        }
+        .file-input-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #9CA3AF;
+            margin-bottom: 0.5rem;
+        }
+        .file-input {
+            width: 100%;
+            background-color: #1F2937;
+            border: 1px solid #4B5563;
+            color: white;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100;
+        }
+    </style>
 </head>
-<body>
-  <header>
-    <h1>SONICLAB®</h1>
-    <p>La plataforma de IA para artistas que quieren sonar como leyenda.</p>
-  </header>
-  <main>
-    <section>
-      <h2>🎧 Letras AI - Generador Pro</h2>
-      <textarea placeholder="Escribe una idea o estilo de letra..."></textarea>
-      <button>Generar Letra</button>
-      <div class="result">"Desde abajo, sin cadenas, volando con fuego en las venas..."</div>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="fixed w-full z-50 bg-black/80 backdrop-blur-lg border-b border-gray-800">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-black text-white uppercase tracking-widest">SONIC<span class="gradient-text">LAB</span></div>
+            <div id="user-status-container" class="flex items-center gap-4">
+                <!-- User status will be rendered here -->
+            </div>
+        </nav>
+    </header>
+
+    <!-- Admin Panel -->
+    <section id="admin-panel" class="hidden fixed bottom-0 left-0 right-0 bg-gray-900/90 backdrop-blur-sm border-t-2 border-green-500 p-4 z-[1001]">
+        <div class="container mx-auto text-center">
+            <h3 class="font-bold text-green-400 mb-4 text-lg tracking-widest uppercase">PANEL DE ARQUITECTO</h3>
+            <div class="flex flex-wrap justify-center items-center gap-4">
+                <div class="w-full md:w-auto">
+                    <label for="admin-plan" class="text-xs text-gray-400 block mb-1">Otorgar Plan Vitalicio</label>
+                    <select id="admin-plan" class="bg-gray-800 border border-gray-700 text-white rounded px-2 py-2 text-sm">
+                        <option value="PRO">PRODUCER</option>
+                        <option value="DIAMANTE">ICONO</option>
+                    </select>
+                </div>
+                <div class="w-full md:w-auto">
+                     <label for="admin-credits" class="text-xs text-gray-400 block mb-1">Añadir Créditos</label>
+                    <input type="number" id="admin-credits" placeholder="Ej: 50" class="bg-gray-800 border border-gray-700 text-white rounded px-2 py-2 text-sm w-32">
+                </div>
+                <button id="admin-generate-link" class="bg-green-600 hover:bg-green-700 text-white font-bold text-sm py-2 px-4 rounded self-end">Generar Enlace Mágico</button>
+            </div>
+            <div id="admin-link-container" class="mt-4 hidden">
+                <p class="text-sm text-gray-300 mb-2">Copia y envía este enlace único al usuario:</p>
+                <div class="flex justify-center gap-2">
+                    <input type="text" id="admin-generated-link" readonly class="bg-gray-800 border border-gray-700 text-green-400 rounded px-2 py-1 text-sm w-full max-w-md">
+                    <button id="admin-copy-link" class="bg-gray-600 hover:bg-gray-700 text-white font-bold text-sm py-1 px-3 rounded">Copiar</button>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <section>
-      <h2>🔊 Análisis de Mezcla Nivel Grammy</h2>
-      <input type="file" accept="audio/*">
-      <button>Analizar Mezcla</button>
-      <div class="result">Ecualización recomendada en 3.5 kHz, compresión paralela en el bombo. Estilo: Serban Ghenea.</div>
-    </section>
+    <!-- Main Content -->
+    <main class="pt-24">
+        <!-- Hero Section -->
+        <section class="text-center container mx-auto px-6 py-16">
+            <div class="relative inline-block">
+                <div class="absolute -inset-2 hero-glow rounded-full opacity-50"></div>
+                <h1 class="relative text-5xl md:text-7xl font-black leading-tight mb-4 text-white uppercase">
+                    Forja tus <span class="gradient-text">Hits</span>
+                    <br>El Sonido del Futuro
+                </h1>
+            </div>
+            <p class="max-w-3xl mx-auto text-lg md:text-xl text-gray-400 my-8">
+                Deja de usar las mismas librerías que todos. Accede a herramientas de IA únicas para crear melodías, flows y estrategias que te pondrán en el mapa. El laboratorio que usarían tus ídolos, ahora en tus manos.
+            </p>
+            <a href="#pricing" class="btn-primary text-black font-bold py-4 px-8 rounded-full text-lg">
+                Empezar a Crear
+            </a>
+        </section>
 
-    <section>
-      <h2>🎬 Visuales AI Exportables</h2>
-      <textarea placeholder="Describe tu visual (ej: loop neón glitch urbano)..."></textarea>
-      <button>Generar Visual</button>
-      <div class="result">Loop visual generado: descargable desde downloads/visual01.mp4</div>
-    </section>
+        <!-- Tools Section -->
+        <section id="tools" class="container mx-auto px-6 py-24">
+            <h2 class="text-4xl font-bold text-center mb-12 text-white">El Laboratorio</h2>
+            <div id="tools-grid" class="grid md:grid-cols-3 gap-8">
+                <!-- Tools will be rendered here by JavaScript -->
+            </div>
+        </section>
 
-    <section>
-      <h2>🔁 Loop Instrumental IA</h2>
-      <textarea placeholder="Género, bpm, emoción..."></textarea>
-      <button>Generar Loop</button>
-      <div class="result">Loop generado: descargable desde downloads/loop01.wav</div>
-    </section>
+        <!-- Pricing Section -->
+        <section id="pricing" class="bg-black/50 py-24">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl font-bold text-center mb-12 text-white">Acceso al Laboratorio</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Plan PRO Mensual -->
+                    <div class="card-bg p-6 rounded-xl flex flex-col h-full">
+                        <h3 class="text-2xl font-bold text-white">Plan PRODUCER</h3>
+                        <p class="text-gray-400 mb-4">Mensual</p>
+                        <p class="text-4xl font-extrabold text-white mb-4">$4.990<span class="text-lg font-medium text-gray-400">/mes</span></p>
+                        <ul class="space-y-3 text-gray-300 mb-6 flex-grow">
+                            <li class="flex items-center"><b class="text-pink-500 mr-2">✓</b><span><b>50 Créditos</b> Mensuales</span></li>
+                            <li class="flex items-center"><b class="text-pink-500 mr-2">✓</b><span>Acceso a Herramientas PRO</span></li>
+                            <li class="flex items-center"><b class="text-pink-500 mr-2">✓</b><span>Acordes & Email Pitch</span></li>
+                            <li class="flex items-center text-gray-500"><b class="mr-2">×</b><span>Herramientas Premium ICONO</span></li>
+                        </ul>
+                        <a href="https://www.mercadopago.cl/subscriptions/checkout?preapproval_plan_id=61d8e63e69e344e59370fd7e89b96f9c" target="_blank" class="block w-full btn-secondary text-center font-bold py-3 rounded-lg transition duration-300 mt-auto">Suscribirme</a>
+                        <div id="qr-pro-mensual" class="bg-white p-2 rounded-lg mt-4 mx-auto w-40 h-40"></div>
+                    </div>
+                    <!-- Plan ICONO Mensual -->
+                    <div class="card-bg p-6 rounded-xl flex flex-col h-full">
+                        <h3 class="text-2xl font-bold text-white">Plan ICONO</h3>
+                        <p class="text-gray-400 mb-4">Mensual</p>
+                        <p class="text-4xl font-extrabold text-white mb-4">$9.990<span class="text-lg font-medium text-gray-400">/mes</span></p>
+                        <ul class="space-y-3 text-gray-300 mb-6 flex-grow">
+                            <li class="flex items-center"><b class="text-yellow-400 mr-2">★</b><span><b>Créditos Ilimitados</b></span></li>
+                            <li class="flex items-center"><b class="text-yellow-400 mr-2">★</b><span>Acceso a <b>Todas</b> las Herramientas</span></li>
+                            <li class="flex items-center"><b class="text-yellow-400 mr-2">★</b><span>Synth Preset & Marketing</span></li>
+                            <li class="flex items-center"><b class="text-yellow-400 mr-2">★</b><span>Soporte Prioritario 24/7</span></li>
+                        </ul>
+                        <a href="https://www.mercadopago.cl/subscriptions/checkout?preapproval_plan_id=0b397bb6555942e084ca042e71d2a242" target="_blank" class="block w-full btn-secondary text-center font-bold py-3 rounded-lg transition duration-300 mt-auto">Suscribirme</a>
+                        <div id="qr-diamante-mensual" class="bg-white p-2 rounded-lg mt-4 mx-auto w-40 h-40"></div>
+                    </div>
+                    <!-- Plan PRO Anual -->
+                    <div class="card-bg p-6 rounded-xl flex flex-col h-full">
+                        <h3 class="text-2xl font-bold text-white">Plan PRODUCER</h3>
+                        <p class="text-gray-400 mb-4">Anual <span class="text-green-400 font-bold">(Ahorra 20%)</span></p>
+                        <p class="text-4xl font-extrabold text-white mb-4">$49.990<span class="text-lg font-medium text-gray-400">/año</span></p>
+                        <ul class="space-y-3 text-gray-300 mb-6 flex-grow">
+                             <li class="flex items-center"><b class="text-pink-500 mr-2">✓</b><span><b>50 Créditos</b> Mensuales</span></li>
+                            <li class="flex items-center"><b class="text-pink-500 mr-2">✓</b><span>Acceso a Herramientas PRO</span></li>
+                            <li class="flex items-center"><b class="text-pink-500 mr-2">✓</b><span>Acordes & Email Pitch</span></li>
+                            <li class="flex items-center text-gray-500"><b class="mr-2">×</b><span>Herramientas Premium ICONO</span></li>
+                        </ul>
+                        <a href="https://www.mercadopago.cl/subscriptions/checkout?preapproval_plan_id=97bffffdac9c498d8019054a27a79bf1" target="_blank" class="block w-full btn-secondary text-center font-bold py-3 rounded-lg transition duration-300 mt-auto">Asegurar Ahorro</a>
+                        <div id="qr-pro-anual" class="bg-white p-2 rounded-lg mt-4 mx-auto w-40 h-40"></div>
+                    </div>
+                    <!-- Plan ICONO Anual (Recomendado) -->
+                    <div class="card-bg p-6 rounded-xl flex flex-col relative featured-plan h-full">
+                        <div class="absolute top-0 -translate-y-1/2 w-full flex justify-center"><span class="bg-yellow-500 text-black text-sm font-bold px-4 py-1 rounded-full uppercase tracking-wider">El Más Buscado</span></div>
+                        <h3 class="text-2xl font-bold text-white mt-4">Plan ICONO</h3>
+                        <p class="text-gray-400 mb-4">Anual <span class="text-green-400 font-bold">(Ahorra 20%)</span></p>
+                        <p class="text-4xl font-extrabold text-white mb-4">$99.990<span class="text-lg font-medium text-gray-400">/año</span></p>
+                        <ul class="space-y-3 text-gray-300 mb-6 flex-grow">
+                            <li class="flex items-center"><b class="text-yellow-400 mr-2">★</b><span><b>Créditos Ilimitados</b></span></li>
+                            <li class="flex items-center"><b class="text-yellow-400 mr-2">★</b><span>Acceso a <b>Todas</b> las Herramientas</span></li>
+                            <li class="flex items-center"><b class="text-yellow-400 mr-2">★</b><span>Synth Preset & Marketing</span></li>
+                            <li class="flex items-center"><b class="text-yellow-400 mr-2">★</b><span>Soporte Prioritario 24/7</span></li>
+                        </ul>
+                        <a href="https://www.mercadopago.cl/subscriptions/checkout?preapproval_plan_id=0ce6c115290a4a478b00f3b8b0e31f34" target="_blank" class="block w-full btn-featured text-center font-bold py-3 rounded-lg transition duration-300 mt-auto">Obtener Acceso Total</a>
+                        <div id="qr-diamante-anual" class="bg-white p-2 rounded-lg mt-4 mx-auto w-40 h-40"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 
-    <section>
-      <h2>🎙️ Voz Narrador IA (Texto a Voz)</h2>
-      <textarea id="ttsText" placeholder="Texto a convertir en voz..."></textarea>
-      <button onclick="speak()">Reproducir Voz</button>
-      <audio id="vozIA" controls></audio>
-    </section>
-  </main>
-  <footer>
-    SONICLAB® 2025 – Dominando la industria desde el navegador.
-  </footer>
+    <!-- Footer -->
+    <footer class="bg-black border-t border-gray-800">
+        <div class="container mx-auto px-6 py-8 text-center text-gray-400">
+            <p>&copy; 2025 SonicLab. El Sonido del Futuro.</p>
+        </div>
+    </footer>
 
-  <script>
-    function speak() {
-      const text = document.getElementById("ttsText").value;
-      const voice = new SpeechSynthesisUtterance(text);
-      voice.lang = "es-ES";
-      speechSynthesis.speak(voice);
-    }
-  </script>
+    <!-- MODAL (Solo para herramientas) -->
+    <div id="tool-modal" class="modal-backdrop">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="tool-modal-title" class="text-2xl font-bold text-white flex items-center gap-3"></h2>
+                <button id="close-tool-modal-button" class="close-button">&times;</button>
+            </div>
+            <p id="tool-modal-description" class="text-gray-400 mb-6"></p>
+            
+            <!-- Campos específicos para las herramientas -->
+            <div id="tool-fields-container" class="space-y-4"></div>
+
+            <div id="tool-modal-output" class="mt-4 text-left bg-black p-4 rounded-lg border border-gray-700 min-h-[150px] whitespace-pre-wrap text-gray-300 overflow-y-auto max-h-60"></div>
+            
+            <div class="flex justify-between items-center mt-6">
+                <div id="action-buttons" class="flex items-center gap-4">
+                     <button id="tool-modal-submit" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-6 rounded-lg flex items-center justify-center transition-colors">
+                         <span id="tool-modal-submit-text">Generar</span>
+                         <div id="tool-modal-loader" class="loader hidden ml-2 !w-5 !h-5 !border-2"></div>
+                     </button>
+                     <button id="download-pdf-button" class="hidden bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center transition-colors">
+                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                         PDF
+                     </button>
+                     <button id="download-midi-button" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                         Descargar MIDI
+                     </button>
+                </div>
+                <p id="tool-modal-cost" class="text-sm text-yellow-400 font-semibold"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- ================================== ---
+            // --- CONFIGURACIÓN DE CLAVES DE API ---
+            // --- ================================== ---
+            // ¡Listo! Tus claves han sido insertadas. Las herramientas están activas.
+            const YOUR_GEMINI_API_KEY = "AIzaSyDplVYI4isScm8-HxeAktZuuq3C1tistSk"; // Clave de Google AI Studio
+            const YOUR_REPLICATE_API_KEY = "r8_THfIFuYgxsUSTU97iEg4ldDxFiophEG3bYJlO"; // Clave de Replicate.com
+            
+            const { jsPDF } = window.jspdf;
+            const MidiWriter = window.MidiWriter;
+            
+            // --- DEFINICIÓN DE PLANES Y HERRAMIENTAS ---
+            const planDetails = {
+                'GUEST': { name: 'Novato', credits: 3 },
+                'PRO': { name: 'Producer', credits: 50 },
+                'DIAMANTE': { name: 'Icono', credits: Infinity },
+                'CREATOR': { name: 'El Arquitecto', credits: Infinity }
+            };
+            
+            // ==================================================================
+            // INICIO: ARSENAL DE HERRAMIENTAS DE SONICLAB - VERSIÓN ÉLITE 10/10
+            // ==================================================================
+            const allTools = [
+                 // --- CATEGORÍA: PRODUCCIÓN Y SONIDO ---
+                {
+                    id: 'mastering-de-elite-ia', name: 'Mastering de Élite IA',
+                    description: 'Sube tu canción y una referencia opcional para obtener un master de nivel mundial, listo para la radio.',
+                    icon: '🎚️', requiredPlan: 'DIAMANTE', cost: 15,
+                    type: 'hybrid-mastering'
+                },
+                {
+                    id: 'stem-splitter', name: 'Separador de Stems IA',
+                    description: 'Sube una canción completa y la IA la separará en vocales, bajo, batería y otros instrumentos.',
+                    icon: '✂️', requiredPlan: 'DIAMANTE', cost: 20,
+                    type: 'replicate-audio-upload',
+                    model: 'cjwbw/demucs:25a173108cff36ef9f8043644d81df27ca350000dc30799639a0b16c1753ce03',
+                    input: (p) => ({ audio: p.audio_file })
+                },
+                {
+                    id: 'noise-reducer', name: 'Reductor de Ruido IA',
+                    description: 'Limpia tus grabaciones de voz o instrumentos eliminando el ruido de fondo no deseado.',
+                    icon: '🤫', requiredPlan: 'PRO', cost: 5,
+                    type: 'replicate-audio-upload',
+                    model: 'b673833a09c638178d951564734411f3575f0483a2b1ef47b1b9a477fd25a3b3',
+                    input: (p) => ({ audio: p.audio_file })
+                },
+                { 
+                    id: 'analisis-de-mezcla', name: 'Análisis de Mezcla Élite', 
+                    description: 'Tu ingeniero personal. Recibe un informe detallado y un checklist para sonar profesional.', 
+                    icon: '📊', requiredPlan: 'DIAMANTE', cost: 5, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un ingeniero de mezcla ganador de Grammys (como Manny Marroquin). Un artista describe su mezcla así: "${p.descripcion}". Opcionalmente, ha provisto una canción de referencia profesional: ${p.referencia || 'ninguna'}. Crea un informe de mezcla que incluya: 1. **Diagnóstico Estratégico:** Identifica los 2 problemas más probables. 2. **Plan de Acción Priorizado:** 4 pasos a seguir en formato de checklist. 3. **Seteos de Plugins (Nivel Pro):** Parámetros de EQ y Compresión para voz y bajo. 4. **El Secreto del Ingeniero (Tip de Oro):** Un truco avanzado de mezcla (automatización, buses paralelos, etc.) que separará esta mezcla de las demás.`
+                },
+                { 
+                    id: 'vocal-preset-ia', name: 'Vocal Preset IA 2.0', description: 'Obtén la cadena de efectos y seteos exactos para sonar como tus ídolos.', icon: '🎛️', requiredPlan: 'DIAMANTE', cost: 4, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un ingeniero de mezcla de élite como Jaycen Joshua. Crea una cadena de mezcla vocal para sonar como ${p.artista} usando exclusivamente plugins de ${p.plugins}. La respuesta DEBE ser una guía profesional y detallada estructurada en: 1. "Filosofía del Sonido": Explica el carácter vocal del artista. 2. "Cadena de Plugins (En Orden)": Una lista numerada de los plugins. 3. "Seteos Detallados": Para CADA plugin, detalla los parámetros exactos (frecuencias de EQ, ratio de compresión, etc.). 4. "El Secreto del Ingeniero": Un truco final no convencional que defina el sonido.`
+                },
+
+                // --- CATEGORÍA: COMPOSICIÓN Y CREATIVIDAD ---
+                {
+                    id: 'co-productor-ia', name: 'Co-Productor IA (Topliner)',
+                    description: 'Sube tu beat y recibe una melodía vocal original ("topline") y armonías en formato MIDI.',
+                    icon: '🧑‍🎤', requiredPlan: 'DIAMANTE', cost: 18,
+                    type: 'hybrid-topliner'
+                },
+                {
+                    id: 'ai-music-generator', name: 'Generador de Música IA',
+                    description: 'Describe una escena o un sentimiento y la IA compondrá una pieza musical original para ti.',
+                    icon: '🎵', requiredPlan: 'DIAMANTE', cost: 15,
+                    type: 'replicate-audio',
+                    model: 'meta/musicgen:7a76a8258b23fae65c5a22debb8841d1d7e816b75c2f24218cd2bd8573787906',
+                    input: (p) => ({ prompt: p.prompt, duration: 10 })
+                },
+                { 
+                    id: 'flow-generator', name: 'Flow Generator 2.0', 
+                    description: 'Genera chanteos, métricas y cadenas de rimas para romper el beat.', 
+                    icon: '🎤', requiredPlan: 'PRO', cost: 1, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un ghostwriter de élite que ha trabajado con Drake y Kendrick Lamar. Sobre el tema "${p.tema}", genera 8 barras de letra. El flow debe ser de ${p.flow}. La letra debe incluir punchlines complejos y una cadena de rimas multisilábicas al estilo de ${p.artista}. La respuesta DEBE incluir: 1. **Letra:** La letra, limpia y profesional. 2. **Análisis Estratégico:** Por qué esta letra es superior. 3. **Coaching Vocal (Tip de Oro):** Un consejo específico sobre la entrega, cadencia o acentuación de una línea clave para maximizar su impacto emocional. 4. **Mapa de Cadencia Visual (Texto):** Una representación simple de la cadencia de las primeras 2 barras (ej: | ta ta TA ta | ta ta TA - |).` 
+                },
+                { 
+                    id: 'drum-pattern', name: 'Drum Pattern IA', 
+                    description: 'Rompe el beat block. Genera patrones de batería potentes y descárgalos en formato MIDI.', 
+                    icon: '🥁', requiredPlan: 'PRO', cost: 2, type: 'gemini-midi',
+                    prompt: (p) => `Actúa como un productor de beats de nivel Grammy experto en ${p.genero}. Genera un patrón de batería de 2 compases (32 pasos). La respuesta DEBE ser un objeto JSON con una clave "pattern". El valor debe ser un array de objetos, donde cada objeto representa una nota y tiene las claves "note" (número MIDI: 36 para Kick, 38 para Snare, 42 para Hi-Hat), "tick" (posición de 0 a 3072, donde 96 ticks = 1 semicorchea), "duration" ('16n'), y "velocity" (de 0 a 1, ej: 0.9). Incluye variaciones de velocity para un groove humano.`
+                },
+                { 
+                    id: 'acordes-para-sample', name: 'Acordes para Sample', 
+                    description: '¿Tienes un sample a capella? La IA te da progresiones de acordes y una línea de bajo.', 
+                    icon: '🎼', requiredPlan: 'PRO', cost: 2, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un productor y teórico musical de élite. Un artista tiene un sample a capella descrito como: "${p.descripcion}". Genera 2 progresiones de acordes. Para cada una, explica por qué funciona. Finaliza con: 1. **Línea de Bajo Sugerida:** Una línea de bajo simple en notación de notas (ej: C2 - G1 - A1 - F1) para la primera progresión. 2. **Acorde de Color (Tip de Oro):** Una sugerencia de un acorde de séptima o novena para añadir sofisticación.`
+                },
+                { 
+                    id: 'sonido-unico-ia', name: 'Sonido Único IA', description: 'Tu productor ejecutivo. Fusiona los estilos de tus ídolos para crear tu propio sonido.', icon: '🧬', requiredPlan: 'DIAMANTE', cost: 5, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un productor ejecutivo visionario. Un artista quiere crear un sonido que fusione el estilo de "${p.artista1}" con "${p.artista2}". Genera un informe detallado sobre cómo lograr esta fusión. La respuesta debe incluir: 1. "Concepto Sónico": Cómo unir los dos mundos. 2. "Paleta Sónica Detallada": Qué tipo de 808, snare, y textura principal usar. 3. "El Secreto de la Fusión": Un truco de producción específico para que la mezcla de estilos funcione y suene original.`
+                },
+                { 
+                    id: 'synth-preset-ia', name: 'Synth Preset IA', description: 'Tu diseñador de sonido personal. Crea presets únicos para tus sintetizadores.', icon: '🎹', requiredPlan: 'DIAMANTE', cost: 3, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un diseñador de sonido experto. Genera los parámetros para un preset de sintetizador basado en la siguiente descripción: "${p.descripcion}". La respuesta debe incluir: Tipo de Oscilador (Onda), Set de Envolvente (ADSR), Posición del Filtro (Cutoff) y una sugerencia de efecto (FX) para lograr ese sonido.`
+                },
+                { 
+                    id: 'remix-concept', name: 'Remix Concept IA', description: 'Dale una nueva vida a tu tema. La IA diseña 3 conceptos de remix en diferentes géneros.', icon: '🔀', requiredPlan: 'DIAMANTE', cost: 4, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un productor y DJ de fama mundial. Tienes que remezclar la canción "${p.titulo}", que es un ${p.generoOriginal}. Genera 3 conceptos de remix en géneros diferentes y populares. Para cada concepto, describe: 1. El Nuevo Género. 2. El Nuevo BPM. 3. Los Elementos Clave a mantener de la original. 4. Los Nuevos Instrumentos a añadir.`
+                },
+
+                // --- CATEGORÍA: ESTRATEGIA Y NEGOCIO ---
+                {
+                    id: 'analizador-de-viralidad-ia', name: 'Analizador de Viralidad IA',
+                    description: 'Sube un gancho de 15s. La IA lo analiza y te da una puntuación de viralidad y consejos para optimizarlo.',
+                    icon: '🚀', requiredPlan: 'DIAMANTE', cost: 10,
+                    type: 'hybrid-virality'
+                },
+                {
+                    id: 'director-de-videos-ia', name: 'Director de Videos IA',
+                    description: 'Sube tu canción y recibe un concepto de video, un storyboard completo y un keyframe visual generado por IA.',
+                    icon: '🎬', requiredPlan: 'DIAMANTE', cost: 12,
+                    type: 'hybrid-video-director'
+                },
+                { 
+                    id: 'modo-genio', name: 'Modo Genio Élite', 
+                    description: 'Recibe un plan creativo completo y dialoga con un mentor de élite para tu próximo hit.', 
+                    icon: '🧠', requiredPlan: 'DIAMANTE', cost: 5, type: 'gemini-text',
+                    prompt: (p) => `Actúa como ${p.mentor}, un visionario que entiende que la superioridad no está solo en la técnica, sino en la estrategia. Un artista te presenta una idea sobre "${p.tema}". Tu misión es crear un "Creative Brief" que sea una estrategia para crear un hit que genere lealtad. El brief DEBE incluir: 1. **Concepto Central y Ángulo Emocional:** Tu visión refinada de la idea. 2. **Estructura y 'Flow' Predictivo:** Cómo estructurarías la canción para máximo impacto. 3. **Sonido y Producción (La Ventaja Injusta):** Los 3 sonidos clave que le darían una ventaja sónica. 4. **El Secreto del Genio:** Un truco no convencional que haría la canción inolvidable.`
+                },
+                { 
+                    id: 'cover-art-director', name: 'Director de Arte IA', 
+                    description: 'Tu director de arte personal. Genera una portada única y un kit visual completo para redes sociales.', 
+                    icon: '🎨', requiredPlan: 'DIAMANTE', cost: 8, type: 'gemini-image',
+                    prompt: (p) => `Actúa como un director de arte de élite. Para una canción titulada "${p.titulo}" del artista "${p.artista}", con un mood "${p.mood}", crea un prompt de imagen extremadamente detallado para un generador de IA como Imagen 3. La respuesta debe ser únicamente el prompt. Al final, añade una sección **Kit Visual Completo (Tip de Oro):** con una paleta de 5 colores HEX extraídos de la idea, y 2 prompts adicionales, uno optimizado para un Spotify Canvas vertical (9:16) y otro para un banner de YouTube (16:9), manteniendo la coherencia visual.`
+                },
+                { 
+                    id: 'marketing-rollout-ia', name: 'Marketing Rollout IA', description: 'Tu jefe de marketing. Diseña un plan de lanzamiento de 7 días para tu próximo hit.', icon: '📈', requiredPlan: 'DIAMANTE', cost: 4, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un jefe de marketing de una discográfica. Crea un plan de lanzamiento de 7 días para redes sociales (Instagram/TikTok) para la canción "${p.cancion}". Detalla una idea de contenido para cada día, desde 5 días antes del lanzamiento hasta 1 día después, para generar el máximo hype. Para el día del lanzamiento, escribe el copy exacto de la publicación.`
+                },
+                { 
+                    id: 'storyboard-ia', name: 'Storyboard IA', description: 'Crea un storyboard profesional con 6 escenas clave para el videoclip de tu canción.', icon: '🎥', requiredPlan: 'DIAMANTE', cost: 4, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un director de videoclips. Basado en la siguiente letra, crea un storyboard de 6 escenas clave. Para cada escena, describe: 1. El Número de Escena. 2. El Tipo de Plano (ej: Plano General, Primer Plano). 3. La Acción que ocurre. Letra: "${p.letra}".`
+                },
+                { 
+                    id: 'media-training-ia', name: 'Entrenamiento de Medios IA', description: 'Tu publicista personal. Prepárate para cualquier entrevista con respuestas potentes y profesionales.', icon: '🎙️', requiredPlan: 'DIAMANTE', cost: 3, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un publicista y entrenador de medios para artistas de primer nivel. Un artista llamado ${p.artista} va a ser entrevistado sobre su nueva canción "${p.cancion}". El mensaje clave es "${p.mensaje}". Genera respuestas profesionales y memorables para estas 3 preguntas comunes: 1. ¿De qué trata tu nueva canción? 2. ¿Cuál fue tu inspiración? 3. ¿Qué es lo siguiente para ti?`
+                },
+                { 
+                    id: 'identidad-de-marca-ia', name: 'Identidad de Marca IA', description: 'Tu director de marca. Crea un "Brand Kit" completo para tu proyecto artístico.', icon: '💎', requiredPlan: 'DIAMANTE', cost: 5, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un director de marca de una agencia de alto nivel. Crea un "Brand Kit" para un artista. Nombre: "${p.nombre}". Temas clave en su música: "${p.temas}". Color principal: "${p.color}". La respuesta debe incluir: 1. "Concepto de Logo". 2. "Paleta de Colores" con 3 códigos HEX. 3. "Tipografía" (fuente para títulos y para texto). 4. "Voz de Marca" (3 palabras clave). 5. "Idea de Merchandising" creativa.`
+                },
+                { 
+                    id: 'global-release-planner', name: 'Global Release Planner', 
+                    description: 'Crea una hoja de ruta para lanzar tu música en múltiples países.', 
+                    icon: '🌎', requiredPlan: 'DIAMANTE', cost: 6, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un jefe de marketing internacional de Sony Music. Para un lanzamiento de ${p.genero}, crea una estrategia de lanzamiento simultáneo para ${p.paises}. Para cada país, detalla: 1. **Día y Hora Óptima de Lanzamiento (hora local).** 2. **3 Playlists Editoriales Clave a las que apuntar.** 3. **2 Influencers o Medios de Comunicación locales relevantes para contactar.** 4. **Un Ángulo Cultural:** ¿Cómo se puede adaptar el mensaje de marketing para que resuene con la audiencia local?`
+                },
+                { 
+                    id: 'cultural-translator', name: 'Traductor Cultural', 
+                    description: 'Adapta tus letras para que conecten culturalmente en otros países.', 
+                    icon: '🌐', requiredPlan: 'DIAMANTE', cost: 4, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un letrista y experto en localización cultural. Toma la siguiente letra de ${p.origen} y adáptala para el mercado de ${p.objetivo}. No traduzcas literalmente. Reemplaza modismos locales por equivalentes que resuenen en el mercado objetivo. Presenta el resultado en una tabla "Original vs. Adaptación" y añade una **Nota de Impacto Cultural (Tip de Oro):** explicando por qué un cambio específico es crucial para la conexión emocional con la nueva audiencia. Letra: "${p.letra}"`
+                },
+                { 
+                    id: 'royalty-split-simulator', name: 'Simulador de Regalías', 
+                    description: 'Simula el reparto de regalías de tus canciones antes de colaborar.', 
+                    icon: '💰', requiredPlan: 'DIAMANTE', cost: 4, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un business manager de la industria musical. Basado en los siguientes colaboradores y porcentajes: "${p.colaboradores}", calcula las ganancias estimadas para cada parte de un total de ${p.streams} streams en Spotify (usando una tasa promedio de $0.003 USD por stream). Presenta los resultados en una tabla clara que muestre el porcentaje y el monto en dólares para cada colaborador. Añade una "Nota del Manager" con un consejo sobre si el reparto es justo y estándar para la industria.`
+                },
+                { 
+                    id: 'contract-analyzer', name: 'Analizador de Contratos', 
+                    description: 'Analiza contratos, identifica "banderas rojas" y obtén palancas para negociar.', 
+                    icon: '⚖️', requiredPlan: 'DIAMANTE', cost: 10, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un abogado experto en la industria musical. Has recibido el siguiente texto de un contrato: "${p.texto}". Tu misión NO es dar consejo legal, sino educar al artista. Analiza el texto y genera un informe que incluya: 1. **Resumen Ejecutivo Simple.** 2. **Cláusulas Clave Explicadas.** 3. **Puntos de Palanca para Negociar (Tip de Oro):** Identifica 2-3 cláusulas donde un artista independiente tiene más poder para pedir mejores condiciones. 4. **Preguntas Inteligentes para tu Abogado.** 5. **Disclaimer Obligatorio:** Finaliza SIEMPRE con: '**Este análisis es una herramienta educativa y NO constituye asesoramiento legal. Es indispensable que consultes con un abogado cualificado antes de firmar cualquier documento legal.**'`
+                },
+                 { 
+                    id: 'email-pitch', name: 'Email Pitch', 
+                    description: 'Tu manager personal. Escribe emails profesionales para contactar a curadores, blogs o sellos.', 
+                    icon: '📧', requiredPlan: 'PRO', cost: 1, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un A&R y manager de artistas que entiende la psicología de la comunicación. Tu tarea es redactar un email para un ${p.destinatario} para presentar la canción "${p.cancion}" del artista ${p.artista}. El email debe ser corto, directo y contrarrestar el "déficit de confianza" del mercado. Debe ser hiper-personalizado, no un template. Incluye un llamado a la acción claro y el link: ${p.link}. La respuesta debe ser únicamente el texto del email, listo para copiar y pegar.`
+                },
+                { 
+                    id: 'hook-optimizer', name: 'Hook Optimizer', 
+                    description: 'Crea títulos y ganchos virales para tus canciones y redes sociales.', 
+                    icon: '🎣', requiredPlan: 'PRO', cost: 2, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un director creativo y estratega de contenido viral. Basado en la letra y el tema "${p.tema}", genera: 1. **3 Títulos Optimizados.** 2. **3 Hooks Virales para TikTok/Reels.** 3. **Audio Viral Potencial (Tip de Oro):** Identifica el fragmento de 5-15 segundos de la letra con el mayor potencial para convertirse en un 'audio' popular en TikTok, explicando por qué (memorable, relatable, etc.).`
+                },
+                { 
+                    id: 'tech-rider-builder', name: 'Tech Rider Builder', 
+                    description: 'Crea un Rider Técnico profesional para tus shows en vivo en segundos.', 
+                    icon: '⚙️', requiredPlan: 'PRO', cost: 3, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un tour manager y técnico de sonido experimentado. Un artista llamado "${p.nombre}" (contacto: ${p.contacto}) necesita un Rider Técnico profesional para su configuración de "${p.configuracion}" en un recinto "${p.recinto}". Genera un Rider Técnico completo. Al final, añade una sección **Notas del Tour Manager (Tip de Oro):** con un consejo práctico de adaptación basado en el tamaño del recinto seleccionado.`
+                },
+                { 
+                    id: 'metadata-generator', name: 'Generador de Metadatos', 
+                    description: 'Ahorra tiempo. Genera todos los metadatos y textos necesarios para distribuir tu canción.', 
+                    icon: '📝', requiredPlan: 'PRO', cost: 2, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un especialista en distribución digital. Para la canción "${p.titulo}" de ${p.artista} (${p.genero}, mood ${p.mood}), genera la información lista para una distribuidora. Al final, añade una sección **Pitch para Playlists Específicas (Tip de Oro):** con un pitch corto y adaptado para las 2 playlists más importantes del género, explicando por qué encaja.`
+                },
+                { 
+                    id: 'trend-forecaster', name: 'Trend Forecaster Élite', 
+                    description: 'Anticípate a las tendencias y obtén un plan de acción para capitalizarlas.', 
+                    icon: '📈', requiredPlan: 'DIAMANTE', cost: 5, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un analista de datos y 'coolhunter' para una discográfica de primer nivel. Tu misión es detectar micro-tendencias antes de que se vuelvan mainstream. Analiza datos emergentes de TikTok, Spotify, y foros de música para el mercado ${p.mercado} dentro del género ${p.genero}. Genera un informe de inteligencia predictiva que incluya: 1. **La Próxima Ola Sónica:** Describe el subgénero que está ganando tracción. 2. **El ADN del Sonido:** Detalla 3-4 elementos sónicos que lo definen. 3. **Plan de Ataque Rápido:** Un plan de 3 pasos (Contenido TikTok, Producción, Anuncio) para que un artista pueda capitalizar esta tendencia esta misma semana.`
+                },
+                { 
+                    id: 'collab-architect', name: 'Collab Architect Élite', 
+                    description: 'Encuentra colaboradores reales y obtén una propuesta de negocio para presentarles.', 
+                    icon: '🤝', requiredPlan: 'DIAMANTE', cost: 5, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un A&R y estratega musical de élite. Para un artista llamado ${p.nombre} con el sonido "${p.descripcion}" y el objetivo de "${p.objetivo}", encuentra 3 colaboradores REALES y ACCIONABLES. Para cada sugerencia, entrega un informe estratégico: 1. **Artista Sugerido y Sinergia:** Nombre del artista real y por qué su sonido, marca y fans son compatibles. 2. **Concepto Creativo Ganador:** Describe la canción que crearían juntos. 3. **Pitch de Colaboración:** Un borrador del primer mensaje para contactarlo, enfocado en el beneficio mutuo.`
+                },
+                { 
+                    id: 'audience-analyzer', name: 'Audience Analyzer Élite', 
+                    description: 'Convierte tus datos de Spotify en una matriz de contenido estratégico.', 
+                    icon: '🎯', requiredPlan: 'DIAMANTE', cost: 5, type: 'gemini-text',
+                    prompt: (p) => `Actúa como un estratega de marketing digital. Has recibido estos datos de Spotify for Artists: Ciudades: "${p.ciudades}". Demografía: "${p.demografia}". Fuentes: "${p.fuentes}". Playlists: "${p.playlists}". Tu tarea es generar: 1. **Perfil de tu Fan Ideal ("Fan Persona"):** Dale un nombre, edad y motivaciones. 2. **Matriz de Contenido Estratégico:** Una tabla con ideas de contenido para TikTok, Instagram y YouTube Shorts, diseñadas específicamente para conectar con esa "Fan Persona". 3. **Próximo Movimiento Estratégico:** Basado en toda la data, ¿cuál debería ser el siguiente paso del artista para crecer?`
+                },
+            ];
+            // ==================================================================
+            // FIN: ARSENAL DE HERRAMIENTAS
+            // ==================================================================
+
+            // --- ESTADO DE LA APLICACIÓN ---
+            let userState = { plan: 'GUEST', credits: 3 };
+
+            // --- ELEMENTOS DEL DOM ---
+            const dom = {
+                userStatusContainer: document.getElementById('user-status-container'),
+                toolsGrid: document.getElementById('tools-grid'),
+                toolModal: document.getElementById('tool-modal'),
+                closeToolModalBtn: document.getElementById('close-tool-modal-button'),
+                toolModalTitle: document.getElementById('tool-modal-title'),
+                toolModalDescription: document.getElementById('tool-modal-description'),
+                toolModalCost: document.getElementById('tool-modal-cost'),
+                toolModalOutput: document.getElementById('tool-modal-output'),
+                toolModalSubmit: document.getElementById('tool-modal-submit'),
+                toolModalSubmitText: document.getElementById('tool-modal-submit-text'),
+                toolModalLoader: document.getElementById('tool-modal-loader'),
+                downloadPdfButton: document.getElementById('download-pdf-button'),
+                downloadMidiButton: document.getElementById('download-midi-button'),
+                toolFieldsContainer: document.getElementById('tool-fields-container'),
+                adminPanel: document.getElementById('admin-panel'),
+                adminPlan: document.getElementById('admin-plan'),
+                adminCredits: document.getElementById('admin-credits'),
+                adminGenerateLinkBtn: document.getElementById('admin-generate-link'),
+                adminLinkContainer: document.getElementById('admin-link-container'),
+                adminGeneratedLink: document.getElementById('admin-generated-link'),
+                adminCopyLinkBtn: document.getElementById('admin-copy-link')
+            };
+
+            // --- INICIALIZACIÓN ---
+            function init() {
+                loadUserState();
+                setupQRCodes();
+                setupEventListeners();
+                updateBranding();
+            }
+            
+            function updateBranding() {
+                document.title = 'SonicLab - Forja tus Hits';
+                document.querySelector('header .text-2xl').innerHTML = 'SONIC<span class="gradient-text">LAB</span>';
+                document.querySelector('footer p').textContent = '© 2025 SonicLab. El Sonido del Futuro.';
+                document.querySelector('main h1').innerHTML = 'Forja tus <span class="gradient-text">Hits</span><br>El Sonido del Futuro';
+            }
+
+            // --- GESTIÓN DE ESTADO DE USUARIO (Sin cambios) ---
+            function loadUserState() {
+                const urlHash = window.location.hash;
+                if (urlHash === '#creator') {
+                    userState = { plan: 'CREATOR', credits: Infinity };
+                    dom.adminPanel.classList.remove('hidden');
+                } else if (urlHash.startsWith('#grant-')) {
+                    const parts = urlHash.substring(7).split('-');
+                    const plan = parts[0];
+                    const credits = parts.length > 1 ? parseInt(parts[1], 10) : Infinity;
+                    userState = { plan: plan.toUpperCase(), credits: isNaN(credits) ? Infinity : credits };
+                    saveUserState();
+                    alert(`¡Acceso ${planDetails[plan.toUpperCase()].name} activado! Bienvenido a la élite.`);
+                    window.location.hash = '';
+                }
+                else {
+                    const savedState = localStorage.getItem('sonicLabState');
+                    if (savedState) {
+                        userState = JSON.parse(savedState);
+                    } else {
+                        userState = { plan: 'GUEST', credits: 3 };
+                        saveUserState();
+                    }
+                }
+                updateUI();
+            }
+
+            function saveUserState() {
+                if (userState.plan !== 'CREATOR') {
+                    localStorage.setItem('sonicLabState', JSON.stringify(userState));
+                }
+            }
+
+            // --- LÓGICA DE LA INTERFAZ (UI) ---
+            function updateUI() {
+                const planInfo = planDetails[userState.plan] || planDetails['GUEST'];
+                const { name } = planInfo;
+                let planColorClass = 'text-gray-400';
+                if (userState.plan === 'PRO') planColorClass = 'text-pink-500';
+                if (userState.plan === 'DIAMANTE') planColorClass = 'text-yellow-400';
+                if (userState.plan === 'CREATOR') planColorClass = 'text-green-400';
+                
+                const creditsText = userState.credits === Infinity ? 'Ilimitados' : `${userState.credits} Créditos`;
+
+                dom.userStatusContainer.innerHTML = `
+                    <div class="text-right">
+                        <p class="font-bold text-white">${name}</p>
+                        <p class="text-xs font-semibold ${planColorClass}">${creditsText}</p>
+                    </div>
+                `;
+                renderTools();
+            }
+
+            function renderTools() {
+                dom.toolsGrid.innerHTML = '';
+                allTools.sort((a, b) => {
+                    const planOrder = { 'PRO': 1, 'DIAMANTE': 2 };
+                    return (planOrder[a.requiredPlan] || 0) - (planOrder[b.requiredPlan] || 0);
+                });
+                
+                allTools.forEach(tool => {
+                    const isPremiumTool = tool.requiredPlan === 'DIAMANTE';
+                    const canAfford = userState.credits === Infinity || userState.credits >= tool.cost;
+                    
+                    let hasPlanAccess = false;
+                    if (userState.plan === 'CREATOR' || userState.plan === 'DIAMANTE') {
+                        hasPlanAccess = true;
+                    } else {
+                        hasPlanAccess = userState.plan === 'PRO' && !isPremiumTool;
+                    }
+
+                    const canGuestTry = userState.plan === 'GUEST' && !isPremiumTool && canAfford;
+                    const isEffectivelyDisabled = !(canGuestTry || hasPlanAccess);
+
+                    const toolCard = document.createElement('div');
+                    toolCard.className = `card-bg p-6 rounded-2xl text-center transform hover:scale-105 transition-transform duration-300 flex flex-col relative ${isEffectivelyDisabled && !canAfford ? 'disabled-tool' : 'cursor-pointer'}`;
+                    
+                    let overlay = '';
+                    if (isPremiumTool && userState.plan !== 'DIAMANTE' && userState.plan !== 'CREATOR') {
+                        overlay = `<div class="locked-overlay" onclick="document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });"><span class="text-4xl" title="Requiere Plan ICONO">👑</span></div>`;
+                    }
+                    
+                    toolCard.innerHTML = `
+                        ${isPremiumTool ? '<div class="absolute top-4 right-4 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full">ICONO</div>' : ''}
+                        <div class="text-5xl mb-4">${tool.icon}</div>
+                        <h3 class="text-xl font-bold mb-2 text-white">${tool.name}</h3>
+                        <p class="text-gray-400 flex-grow">${tool.description}</p>
+                        <p class="text-yellow-400 font-bold mt-4">Costo: ${tool.cost} Crédito(s)</p>
+                        ${overlay}
+                    `;
+                    
+                     toolCard.addEventListener('click', () => {
+                         if (isPremiumTool && userState.plan !== 'DIAMANTE' && userState.plan !== 'CREATOR') {
+                             alert('Herramienta exclusiva para el plan ICONO. ¡Sube de nivel!');
+                             return;
+                         }
+                         if (!canAfford) {
+                             alert(`Créditos insuficientes. Te quedan ${userState.credits}.`);
+                             return;
+                         }
+                         if (!isEffectivelyDisabled || canGuestTry) {
+                             openToolModal(tool);
+                         }
+                     });
+                    
+                    dom.toolsGrid.appendChild(toolCard);
+                });
+            }
+
+            // --- LÓGICA DE MODALES ---
+            function openToolModal(tool) {
+                dom.toolModalTitle.innerHTML = `<span class="text-4xl">${tool.icon}</span> ${tool.name}`;
+                dom.toolModalDescription.textContent = tool.description;
+                dom.toolModalCost.textContent = `Esto usará ${tool.cost} de tus créditos.`;
+                dom.toolModalOutput.innerHTML = '';
+                dom.downloadPdfButton.classList.add('hidden');
+                dom.downloadMidiButton.classList.add('hidden');
+                
+                renderToolInputs(tool);
+                
+                dom.toolModalSubmit.onclick = () => handleToolExecution(tool);
+                dom.toolModal.classList.add('active');
+            }
+
+            function renderToolInputs(tool) {
+                const container = dom.toolFieldsContainer;
+                container.innerHTML = ''; // Limpiar campos anteriores
+
+                if (tool.type === 'replicate-audio-upload') {
+                    container.innerHTML = `<input type="file" id="audio-file-input" accept="audio/*" class="file-input">`;
+                } else if (tool.type === 'replicate-audio') {
+                     container.innerHTML = `<textarea id="tool-prompt-input" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" rows="3" placeholder="Ej: 80s pop track with synth, high quality, 120bpm..."></textarea>`;
+                } else if (tool.type === 'gemini-image') {
+                     container.innerHTML = `<input type="text" id="cover-artista" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Nombre del Artista"><input type="text" id="cover-titulo" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Título de la Canción"><input type="text" id="cover-mood" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" placeholder="Mood (ej: oscuro, futurista, nostálgico)">`;
+                } else if (tool.type === 'hybrid-mastering') {
+                    container.innerHTML = `
+                        <div>
+                            <label class="file-input-label" for="user-track-input">1. Sube tu canción (WAV, MP3)</label>
+                            <input type="file" id="user-track-input" accept="audio/*" class="file-input">
+                        </div>
+                        <div>
+                            <label class="file-input-label" for="reference-track-input">2. Sube una canción de referencia (Opcional)</label>
+                            <input type="file" id="reference-track-input" accept="audio/*" class="file-input">
+                        </div>
+                    `;
+                } else { // Default for gemini-text tools
+                    switch (tool.id) {
+                        case 'flow-generator':
+                            container.innerHTML = `<input type="text" id="flow-tema" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Tema (ej: lealtad en el barrio)"><select id="flow-tipo" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2"><option value="Trap agresivo">Flow: Trap agresivo</option><option value="Reggaeton melancólico">Flow: Reggaeton melancólico</option><option value="Drill crudo y directo">Flow: Drill crudo y directo</option></select><input type="text" id="flow-artista" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" placeholder="Artista para cadena de rimas (ej: Duki)">`;
+                            break;
+                        case 'drum-pattern':
+                            container.innerHTML = `<select id="drum-genero" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"><option value="Reggaeton">Género: Reggaeton</option><option value="Trap">Género: Trap</option><option value="Boom Bap">Género: Boom Bap</option></select>`;
+                            break;
+                        case 'acordes-para-sample':
+                            container.innerHTML = `<textarea id="acordes-descripcion" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" rows="4" placeholder="Describe tu sample (ej: 'una voz femenina melancólica, tempo lento')"></textarea>`;
+                            break;
+                        case 'email-pitch':
+                             container.innerHTML = `<input type="text" id="pitch-artista" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Tu Nombre de Artista"><input type="text" id="pitch-cancion" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Nombre de tu Canción"><input type="text" id="pitch-link" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Link a tu canción (Spotify, YouTube, etc.)"><select id="pitch-destinatario" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"><option value="un curador de playlists de Spotify">Destinatario: Curador de Playlist</option><option value="un blog de música urbana">Destinatario: Blog de Música</option><option value="un sello discográfico independiente">Destinatario: Sello Discográfico</option></select>`;
+                            break;
+                        case 'hook-optimizer':
+                            container.innerHTML = `<textarea id="hook-tema" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" rows="4" placeholder="Pega aquí la letra o describe el tema de tu canción..."></textarea>`;
+                            break;
+                         case 'tech-rider-builder':
+                            container.innerHTML = `<input type="text" id="rider-nombre" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Nombre del Artista o Banda"><input type="text" id="rider-contacto" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Email o Teléfono de Contacto"><textarea id="rider-configuracion" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" rows="3" placeholder="Describe tu formación y equipo clave..."></textarea><select id="rider-recinto" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"><option value="Club Pequeño (hasta 100 personas)">Club Pequeño</option><option value="Sala Mediana (100-500 personas)">Sala Mediana</option><option value="Festival o Recinto Grande">Festival / Recinto Grande</option></select>`;
+                            break;
+                        case 'metadata-generator':
+                            container.innerHTML = `<input type="text" id="meta-artista" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Nombre del Artista"><input type="text" id="meta-titulo" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Título de la Canción"><input type="text" id="meta-genero" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Género Principal"><input type="text" id="meta-mood" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" placeholder="Mood de la canción (ej: energético, melancólico)">`;
+                            break;
+                        case 'modo-genio':
+                            container.innerHTML = `<textarea id="genio-tema" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" rows="3" placeholder="Describe la idea o tema de tu canción..."></textarea><select id="genio-mentor" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"><option value="Tainy">Mentor: Tainy (Producción)</option><option value="Drake">Mentor: Drake (Letra y Storytelling)</option><option value="The Weeknd">Mentor: The Weeknd (Atmósfera y Sonido)</option><option value="Bad Bunny">Mentor: Bad Bunny (Energía y Flow)</option></select>`;
+                            break;
+                        case 'analisis-de-mezcla':
+                            container.innerHTML = `<textarea id="analisis-descripcion" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" rows="4" placeholder="Describe tu mezcla y tus problemas..."></textarea><input type="text" id="analisis-referencia" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" placeholder="URL de YouTube de referencia (Opcional)">`;
+                            break;
+                        case 'contract-analyzer':
+                             container.innerHTML = `<textarea id="contract-texto" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" rows="8" placeholder="Pega aquí el texto completo del contrato..."></textarea>`;
+                            break;
+                        case 'vocal-preset-ia':
+                            container.innerHTML = `<select id="vocal-daw" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2"><option value="Plugins Nativos (FL Studio, Ableton, Logic)">Plugins Nativos (Cualquier DAW)</option><option value="Plugins de Waves">Plugins de Waves</option><option value="Plugins de Slate Digital">Plugins de Slate Digital</option></select><input type="text" id="vocal-artista" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" placeholder="Artista de referencia (ej: The Weeknd, Bad Bunny)">`;
+                            break;
+                        case 'identidad-de-marca-ia':
+                            container.innerHTML = `<input type="text" id="brand-nombre" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Tu nombre artístico"><textarea id="brand-temas" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" rows="2" placeholder="Temas clave en tu música (ej: calle, lujo, desamor)"></textarea><input type="text" id="brand-color" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" placeholder="Un color que te represente (ej: morado oscuro)">`;
+                            break;
+                        case 'sonido-unico-ia':
+                            container.innerHTML = `<input type="text" id="sound-artista1" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Primer artista (ej: Tainy)"><input type="text" id="sound-artista2" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" placeholder="Segundo artista (ej: The Weeknd)">`;
+                            break;
+                        case 'synth-preset-ia':
+                            container.innerHTML = `<textarea id="synth-descripcion" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" rows="3" placeholder="Describe el sonido que buscas (ej: 'un pad oscuro y atmosférico para trap')"></textarea>`;
+                            break;
+                        case 'marketing-rollout-ia':
+                            container.innerHTML = `<input type="text" id="marketing-cancion" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" placeholder="Nombre de tu canción">`;
+                            break;
+                        case 'video-concept-ia':
+                            container.innerHTML = `<input type="text" id="video-titulo" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Nombre de la canción"><input type="text" id="video-mood" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" placeholder="Mood de la canción (ej: melancólico, calle, fiesta)">`;
+                            break;
+                        case 'storyboard-ia':
+                             container.innerHTML = `<textarea id="storyboard-letra" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" rows="4" placeholder="Pega aquí la letra de tu canción..."></textarea>`;
+                            break;
+                        case 'remix-concept':
+                            container.innerHTML = `<input type="text" id="remix-titulo" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Nombre de la canción original"><input type="text" id="remix-genero" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" placeholder="Género original (ej: Trap)">`;
+                            break;
+                        case 'media-training-ia':
+                            container.innerHTML = `<input type="text" id="media-artista" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Tu nombre artístico"><input type="text" id="media-cancion" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Nombre de tu nueva canción"><textarea id="media-mensaje" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" rows="3" placeholder="El mensaje clave que quieres comunicar..."></textarea>`;
+                            break;
+                        case 'global-release-planner':
+                            container.innerHTML = `<input type="text" id="release-paises" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Países Objetivo (ej: México, España, Argentina)"><select id="release-genero" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"><option value="Urbano Latino">Género: Urbano Latino</option><option value="Pop Global">Género: Pop Global</option><option value="Electrónica">Género: Electrónica</option></select>`;
+                            break;
+                        case 'cultural-translator':
+                            container.innerHTML = `<textarea id="translator-letra" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" rows="6" placeholder="Pega aquí la letra original..."></textarea><select id="translator-origen" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2"><option value="Español de Argentina">Origen: Español de Argentina</option><option value="Español de Chile">Origen: Español de Chile</option><option value="Español de Colombia">Origen: Español de Colombia</option><option value="Español de España">Origen: Español de España</option><option value="Español de México">Origen: Español de México</option></select><select id="translator-objetivo" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"><option value="Español Neutro (Global)">Objetivo: Español Neutro (Global)</option><option value="Inglés (Americano)">Objetivo: Inglés (Americano)</option><option value="Portugués (Brasil)">Objetivo: Portugués (Brasil)</option></select>`;
+                            break;
+                        case 'royalty-split-simulator':
+                            container.innerHTML = `<textarea id="royalty-colaboradores" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" rows="4" placeholder="Ej: Artista (Letra/Voz) - 50%, Productor (Beat) - 50%"></textarea><input type="number" id="royalty-streams" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" placeholder="Número de Streams (ej: 1000000)">`;
+                            break;
+                         case 'trend-forecaster':
+                            container.innerHTML = `<select id="trend-mercado" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2"><option value="Global">Mercado: Global</option><option value="Latinoamérica">Mercado: Latinoamérica</option><option value="España">Mercado: España</option><option value="Anglo">Mercado: Anglo</option></select><select id="trend-genero" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"><option value="Urbano (Trap, Reggaeton, Drill)">Género: Urbano</option><option value="Pop">Género: Pop</option><option value="Electrónica">Género: Electrónica</option></select>`;
+                            break;
+                        case 'collab-architect':
+                            container.innerHTML = `<input type="text" id="collab-nombre" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Tu nombre artístico"><textarea id="collab-descripcion" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" rows="3" placeholder="Describe tu sonido e influencias..."></textarea><select id="collab-objetivo" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2"><option value="llegar a una nueva audiencia">Objetivo: Llegar a nueva audiencia</option><option value="crear un hit de nicho">Objetivo: Crear un hit de nicho</option><option value="experimentar con un nuevo sonido">Objetivo: Experimentar</option></select>`;
+                            break;
+                        case 'audience-analyzer':
+                             container.innerHTML = `<input type="text" id="audience-ciudades" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Ciudades Principales (ej: Santiago, CDMX, B.A.)"><input type="text" id="audience-demografia" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" placeholder="Demografía (ej: 65% Hombres, 18-27 años)"><textarea id="audience-fuentes" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 mb-2" rows="2" placeholder="Fuentes de Streams (ej: Perfil, Playlists de oyentes...)"></textarea><textarea id="audience-playlists" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" rows="2" placeholder="Playlists donde apareces..."></textarea>`;
+                            break;
+                        default:
+                             container.innerHTML = `<textarea id="tool-prompt-input" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2" rows="4" placeholder="Describe tu idea..."></textarea>`;
+                    }
+                }
+            }
+            
+            function getToolInputs(tool) {
+                 if (tool.type === 'replicate-audio-upload') {
+                    const fileInput = document.getElementById('audio-file-input');
+                    if (!fileInput || !fileInput.files[0]) return null;
+                    return { audio_file: fileInput.files[0] };
+                } else if (tool.type === 'replicate-audio') {
+                    return { prompt: document.getElementById('tool-prompt-input').value };
+                } else if (tool.type === 'gemini-image') {
+                    return { artista: document.getElementById('cover-artista').value, titulo: document.getElementById('cover-titulo').value, mood: document.getElementById('cover-mood').value };
+                } else if (tool.type === 'hybrid-mastering') {
+                    const userTrackInput = document.getElementById('user-track-input');
+                    const referenceTrackInput = document.getElementById('reference-track-input');
+                    if (!userTrackInput || !userTrackInput.files[0]) return null;
+                    return { 
+                        userTrack: userTrackInput.files[0],
+                        referenceTrack: referenceTrackInput.files[0] || null
+                    };
+                } else { // Default for gemini-text tools
+                    switch (tool.id) {
+                        case 'flow-generator':
+                            return { tema: document.getElementById('flow-tema').value, flow: document.getElementById('flow-tipo').value, artista: document.getElementById('flow-artista').value };
+                        case 'drum-pattern':
+                            return { genero: document.getElementById('drum-genero').value };
+                        case 'acordes-para-sample':
+                            return { descripcion: document.getElementById('acordes-descripcion').value };
+                        case 'email-pitch':
+                            return { artista: document.getElementById('pitch-artista').value, cancion: document.getElementById('pitch-cancion').value, link: document.getElementById('pitch-link').value, destinatario: document.getElementById('pitch-destinatario').value };
+                        case 'hook-optimizer':
+                            return { tema: document.getElementById('hook-tema').value };
+                        case 'tech-rider-builder':
+                            return { nombre: document.getElementById('rider-nombre').value, contacto: document.getElementById('rider-contacto').value, configuracion: document.getElementById('rider-configuracion').value, recinto: document.getElementById('rider-recinto').value };
+                        case 'metadata-generator':
+                            return { artista: document.getElementById('meta-artista').value, titulo: document.getElementById('meta-titulo').value, genero: document.getElementById('meta-genero').value, mood: document.getElementById('meta-mood').value };
+                        case 'modo-genio':
+                            return { tema: document.getElementById('genio-tema').value, mentor: document.getElementById('genio-mentor').value };
+                        case 'analisis-de-mezcla':
+                            return { descripcion: document.getElementById('analisis-descripcion').value, referencia: document.getElementById('analisis-referencia').value };
+                        case 'contract-analyzer':
+                            return { texto: document.getElementById('contract-texto').value };
+                        case 'vocal-preset-ia':
+                            return { plugins: document.getElementById('vocal-daw').value, artista: document.getElementById('vocal-artista').value };
+                        case 'identidad-de-marca-ia':
+                            return { nombre: document.getElementById('brand-nombre').value, temas: document.getElementById('brand-temas').value, color: document.getElementById('brand-color').value };
+                        case 'sonido-unico-ia':
+                            return { artista1: document.getElementById('sound-artista1').value, artista2: document.getElementById('sound-artista2').value };
+                        case 'synth-preset-ia':
+                            return { descripcion: document.getElementById('synth-descripcion').value };
+                        case 'marketing-rollout-ia':
+                            return { cancion: document.getElementById('marketing-cancion').value };
+                        case 'video-concept-ia':
+                             return { titulo: document.getElementById('video-titulo').value, mood: document.getElementById('video-mood').value };
+                        case 'storyboard-ia':
+                            return { letra: document.getElementById('storyboard-letra').value };
+                        case 'remix-concept':
+                            return { titulo: document.getElementById('remix-titulo').value, generoOriginal: document.getElementById('remix-genero').value };
+                        case 'media-training-ia':
+                            return { artista: document.getElementById('media-artista').value, cancion: document.getElementById('media-cancion').value, mensaje: document.getElementById('media-mensaje').value };
+                        case 'global-release-planner':
+                            return { paises: document.getElementById('release-paises').value, genero: document.getElementById('release-genero').value };
+                        case 'cultural-translator':
+                            return { letra: document.getElementById('translator-letra').value, origen: document.getElementById('translator-origen').value, objetivo: document.getElementById('translator-objetivo').value };
+                        case 'royalty-split-simulator':
+                            return { colaboradores: document.getElementById('royalty-colaboradores').value, streams: document.getElementById('royalty-streams').value };
+                        case 'trend-forecaster':
+                            return { mercado: document.getElementById('trend-mercado').value, genero: document.getElementById('trend-genero').value };
+                        case 'collab-architect':
+                            return { nombre: document.getElementById('collab-nombre').value, descripcion: document.getElementById('collab-descripcion').value, objetivo: document.getElementById('collab-objetivo').value };
+                        case 'audience-analyzer':
+                             return { ciudades: document.getElementById('audience-ciudades').value, demografia: document.getElementById('audience-demografia').value, fuentes: document.getElementById('audience-fuentes').value, playlists: document.getElementById('audience-playlists').value };
+                        default:
+                            const inputEl = document.getElementById('tool-prompt-input');
+                            return inputEl ? { prompt: inputEl.value } : {};
+                    }
+                }
+            }
+
+            function closeModal(modal) {
+                modal.classList.remove('active');
+            }
+
+            // --- LÓGICA DE HERRAMIENTAS Y API ---
+            async function handleToolExecution(tool) {
+                const inputs = getToolInputs(tool);
+                if (!inputs) {
+                    alert("Por favor, selecciona un archivo.");
+                    return;
+                }
+                
+                if (tool.type.startsWith('replicate') && !YOUR_REPLICATE_API_KEY) {
+                    alert("Error de configuración: La API Key de Replicate no está definida.");
+                    return;
+                }
+                if (tool.type.startsWith('gemini') && !YOUR_GEMINI_API_KEY) {
+                    alert("Error de configuración: La API Key de Gemini no está definida.");
+                    return;
+                }
+
+                dom.toolModalSubmitText.textContent = 'Creando...';
+                dom.toolModalLoader.classList.remove('hidden');
+                dom.toolModalSubmit.disabled = true;
+                dom.toolModalOutput.innerHTML = `<div class="flex justify-center items-center h-full"><div class="loader"></div><p class="ml-4">La IA está trabajando...</p></div>`;
+                dom.downloadPdfButton.classList.add('hidden');
+                dom.downloadMidiButton.classList.add('hidden');
+
+                try {
+                    if (tool.type === 'gemini-text' || tool.type === 'gemini-midi') {
+                        await handleTextGeneration(tool, inputs);
+                    } else if (tool.type === 'gemini-image') {
+                        await handleImageGeneration(tool, inputs);
+                    } else if (tool.type.startsWith('replicate')) {
+                        await handleReplicateExecution(tool, inputs);
+                    } else if (tool.type === 'hybrid-mastering') {
+                        await handleHybridMastering(tool, inputs);
+                    }
+
+                    if (userState.credits !== Infinity) {
+                        userState.credits -= tool.cost;
+                        saveUserState();
+                        updateUI();
+                    }
+                } catch (error) {
+                    dom.toolModalOutput.innerHTML = `<p class="text-red-500">Error: ${error.message}</p>`;
+                } finally {
+                    dom.toolModalSubmitText.textContent = 'Generar';
+                    dom.toolModalLoader.classList.add('hidden');
+                    dom.toolModalSubmit.disabled = false;
+                }
+            }
+            
+            // --- LÓGICA DE MASTERING DE ÉLITE ---
+            async function handleHybridMastering(tool, inputs) {
+                // Paso 1: Análisis Estratégico con Gemini
+                let analysisPrompt;
+                if (inputs.referenceTrack) {
+                    analysisPrompt = `Actúa como un ingeniero de mastering de clase mundial como Luca Pretolesi. Voy a masterizar una canción llamada "${inputs.userTrack.name}". Quiero que suene como la canción de referencia, "${inputs.referenceTrack.name}". Describe en 3 puntos clave y accionables qué ajustes sónicos (EQ, compresión, imagen estéreo) aplicarías para lograr ese sonido de referencia. Sé técnico pero conciso.`;
+                } else {
+                    analysisPrompt = `Actúa como un ingeniero de mastering de clase mundial como Luca Pretolesi. Voy a masterizar una canción llamada "${inputs.userTrack.name}". No tengo una referencia. Describe en 3 puntos clave y accionables un plan de mastering estándar de la industria para darle potencia, claridad y un carácter comercial.`;
+                }
+                
+                const masteringBrief = await callGeminiAPI(analysisPrompt);
+                dom.toolModalOutput.innerHTML = `<h3>Informe del Ingeniero IA:</h3>${parseToHTML(masteringBrief)}<div class="flex justify-center items-center h-full mt-4"><div class="loader"></div><p class="ml-4">Aplicando master a tu canción...</p></div>`;
+
+                // Paso 2: Procesamiento de Audio con Replicate
+                const replicateTool = {
+                    model: 'cjwbw/audiotools-v1:9a73e059728551733696536675a6493dfd08b3303530f78275508be61036815a',
+                    input: (p) => ({ input_audio: p.audio_file })
+                };
+                const audioResultUrl = await processReplicateAudio(replicateTool, { audio_file: inputs.userTrack });
+
+                // Paso 3: Mostrar resultado final
+                dom.toolModalOutput.innerHTML = `<h3>Informe del Ingeniero IA:</h3>${parseToHTML(masteringBrief)}<h3 class="mt-6">Resultado Final:</h3><audio controls class="w-full" src="${audioResultUrl}"></audio>`;
+            }
+
+            async function processReplicateAudio(tool, inputs) {
+                const base64Audio = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(inputs.audio_file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                });
+                const finalInput = tool.input({ audio_file: base64Audio });
+
+                const startResponse = await fetch('https://api.replicate.com/v1/predictions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Token ${YOUR_REPLICATE_API_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ version: tool.model, input: finalInput })
+                });
+
+                let prediction = await startResponse.json();
+                if (startResponse.status !== 201) throw new Error(prediction.detail || "Error al iniciar la tarea en Replicate.");
+
+                while (prediction.status !== 'succeeded' && prediction.status !== 'failed') {
+                    await new Promise(resolve => setTimeout(resolve, 2500));
+                    const pollResponse = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, { headers: { 'Authorization': `Token ${YOUR_REPLICATE_API_KEY}` } });
+                    prediction = await pollResponse.json();
+                    if (pollResponse.status !== 200) throw new Error(prediction.detail || "Error al consultar el estado de la tarea.");
+                }
+
+                if (prediction.status === 'failed') throw new Error("La IA no pudo procesar el audio. Intenta con otro archivo.");
+                
+                return prediction.output;
+            }
+
+            // --- LÓGICA PARA REPLICATE (Música, Stems, Ruido) ---
+            async function handleReplicateExecution(tool, inputs) {
+                const audioResultUrl = await processReplicateAudio(tool, inputs);
+                displayReplicateResult(tool, audioResultUrl);
+            }
+
+            function displayReplicateResult(tool, output) {
+                dom.toolModalOutput.innerHTML = ''; // Limpiar loader
+                
+                if (tool.id === 'stem-splitter') {
+                    let outputHtml = '<p class="font-bold text-lg mb-4">¡Stems listos para descargar!</p>';
+                    const stems = { 'Vocals': output.vocals, 'Bass': output.bass, 'Drums': output.drums, 'Other': output.other };
+                    for (const [name, url] of Object.entries(stems)) {
+                        outputHtml += `
+                            <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg mb-2">
+                                <span>${name}.wav</span>
+                                <a href="${url}" target="_blank" download class="download-stem-button font-bold py-1 px-3 rounded-lg text-sm">Descargar</a>
+                            </div>`;
+                    }
+                    dom.toolModalOutput.innerHTML = outputHtml;
+                } else {
+                    dom.toolModalOutput.innerHTML = `<p class="font-bold text-lg mb-2">¡Resultado listo!</p><audio controls class="w-full" src="${output}"></audio>`;
+                }
+            }
+
+
+            // --- LÓGICA DE GEMINI (TEXTO E IMAGEN) ---
+            async function handleTextGeneration(tool, inputs) {
+                const prompt = tool.prompt(inputs);
+                const resultText = await callGeminiAPI(prompt);
+                
+                if (tool.type === 'gemini-midi') {
+                    try {
+                        const midiData = JSON.parse(resultText);
+                        let html = `<h3>Guía de Programación:</h3><p>${midiData.guia}</p>`;
+                        html += `<h3>Tips de Sonido:</h3><p>${midiData.sonidos}</p>`;
+                        html += `<h3>Groove Secreto:</h3><p>${midiData.groove}</p>`;
+                        dom.toolModalOutput.innerHTML = html;
+                        
+                        dom.downloadMidiButton.classList.remove('hidden');
+                        dom.downloadMidiButton.onclick = () => {
+                            const track = new MidiWriter.Track();
+                            midiData.pattern.forEach(note => {
+                                track.addEvent(new MidiWriter.NoteEvent({
+                                    pitch: [note.note],
+                                    startTick: note.tick,
+                                    duration: note.duration,
+                                    velocity: Math.floor(note.velocity * 100)
+                                }));
+                            });
+                            const write = new MidiWriter.Writer(track);
+                            const dataUri = write.dataUri();
+                            const a = document.createElement('a');
+                            a.href = dataUri;
+                            a.download = 'soniclab_pattern.mid';
+                            a.click();
+                        };
+
+                    } catch(e) {
+                         console.error("Error parsing MIDI JSON:", e);
+                         dom.toolModalOutput.innerHTML = parseToHTML(resultText);
+                    }
+                } else {
+                    dom.toolModalOutput.innerHTML = parseToHTML(resultText);
+                }
+
+                dom.downloadPdfButton.classList.remove('hidden');
+                dom.downloadPdfButton.onclick = () => generatePDF(tool, resultText);
+            }
+
+            async function handleImageGeneration(tool, inputs) {
+                dom.toolModalOutput.innerHTML = '<p>Generando concepto de arte...</p><div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
+                const promptForPrompt = tool.prompt(inputs);
+                const imagePrompt = await callGeminiAPI(promptForPrompt);
+                
+                dom.toolModalOutput.innerHTML = `<p class="mb-2 text-sm"><strong>Prompt Generado:</strong> ${imagePrompt.split('**Kit')[0]}</p><p>Creando imagen...</p><div class="flex justify-center items-center h-full"><div class="loader"></div></div>`;
+                
+                const imageUrl = await callImageAPI(imagePrompt.split('**Kit')[0]); // Usamos solo el prompt principal
+                if (imageUrl) {
+                    dom.toolModalOutput.innerHTML = `<img src="${imageUrl}" class="w-full h-auto rounded-lg" alt="Portada generada por IA">`;
+                } else {
+                    throw new Error('Error al generar la imagen.');
+                }
+            }
+
+            async function callGeminiAPI(prompt) {
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${YOUR_GEMINI_API_KEY}`;
+                const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error?.message || 'Error desconocido de la API de texto.');
+                    }
+                    const result = await response.json();
+                    return result.candidates?.[0]?.content?.parts?.[0]?.text || "No se pudo generar una respuesta.";
+                } catch (error) {
+                    console.error("Error en llamada a Gemini:", error);
+                    throw new Error(`Error al conectar con la IA de texto: ${error.message}`);
+                }
+            }
+            
+            async function callImageAPI(prompt) {
+                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${YOUR_GEMINI_API_KEY}`;
+                 const payload = { instances: [{ prompt: prompt }], parameters: { "sampleCount": 1 } };
+
+                 try {
+                     const response = await fetch(apiUrl, {
+                         method: 'POST',
+                         headers: { 'Content-Type': 'application/json' },
+                         body: JSON.stringify(payload)
+                     });
+                      if (!response.ok) {
+                         const errorData = await response.json();
+                         throw new Error(errorData.error?.message || 'Error desconocido de la API de imagen.');
+                     }
+                     const result = await response.json();
+                     if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                         return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                     }
+                     return null;
+                 } catch (error) {
+                     console.error("Error en llamada a Imagen:", error);
+                     return null;
+                 }
+            }
+
+            // --- LÓGICA DE UTILIDADES (Sin cambios) ---
+            function parseToHTML(text) {
+                let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                html = html.replace(/### (.*?)\n/g, '<h3 class="text-yellow-400 text-lg font-bold mt-4 mb-2">$1</h3>');
+                html = html.replace(/(\d+)\.\s\*\*(.*?)\*\*/g, '<h3 class="text-yellow-400 text-lg font-bold mt-4 mb-2">$2</h3>');
+                html = html.replace(/\* (.*?)\n/g, '<li class="relative pl-5 before:content-[\'-\'] before:absolute before:left-0 before:text-pink-500">$1</li>');
+                html = html.replace(/\n/g, '<br>');
+                return html;
+            }
+
+            function generatePDF(tool, textContent) {
+                const doc = new jsPDF();
+                const margin = 15;
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const usableWidth = pageWidth - (margin * 2);
+                doc.setFontSize(22);
+                doc.setFont("helvetica", "bold");
+                doc.text("SonicLab", pageWidth / 2, margin, { align: 'center' });
+                doc.setFontSize(16);
+                doc.setFont("helvetica", "normal");
+                doc.text(`${tool.icon} ${tool.name}`, pageWidth / 2, margin + 10, { align: 'center' });
+                doc.setLineWidth(0.5);
+                doc.line(margin, margin + 15, pageWidth - margin, margin + 15);
+                doc.setFontSize(11);
+                const cleanedText = textContent.replace(/\*\*/g, '').replace(/###/g, '\n').replace(/\*/g, '  -');
+                const splitText = doc.splitTextToSize(cleanedText, usableWidth);
+                doc.text(splitText, margin, margin + 30);
+                doc.save(`${tool.name.replace(/ /g, '_')}_Resultado.pdf`);
+            }
+            
+            function setupQRCodes() {
+                const planLinks = {
+                    'pro-mensual': 'https://www.mercadopago.cl/subscriptions/checkout?preapproval_plan_id=61d8e63e69e344e59370fd7e89b96f9c',
+                    'diamante-mensual': 'https://www.mercadopago.cl/subscriptions/checkout?preapproval_plan_id=0b397bb6555942e084ca042e71d2a242',
+                    'pro-anual': 'https://www.mercadopago.cl/subscriptions/checkout?preapproval_plan_id=97bffffdac9c498d8019054a27a79bf1',
+                    'diamante-anual': 'https://www.mercadopago.cl/subscriptions/checkout?preapproval_plan_id=0ce6c115290a4a478b00f3b8b0e31f34'
+                };
+
+                for (const [id, link] of Object.entries(planLinks)) {
+                    const qrContainer = document.getElementById(`qr-${id}`);
+                    if (qrContainer) {
+                        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}&bgcolor=ffffff&color=000000&margin=10`;
+                        const qrImage = document.createElement('img');
+                        qrImage.src = qrCodeUrl;
+                        qrImage.alt = `Código QR para el plan ${id}`;
+                        qrImage.className = "rounded-md w-full h-auto";
+                        qrContainer.innerHTML = '';
+                        qrContainer.appendChild(qrImage);
+                    }
+                }
+            }
+
+            function setupEventListeners() {
+                dom.closeToolModalBtn.addEventListener('click', () => closeModal(dom.toolModal));
+                window.addEventListener('click', (e) => {
+                    if (e.target === dom.toolModal) closeModal(dom.toolModal);
+                });
+                
+                dom.adminGenerateLinkBtn.addEventListener('click', () => {
+                    const plan = dom.adminPlan.value;
+                    const credits = dom.adminCredits.value;
+                    const baseUrl = window.location.href.split('#')[0];
+                    let grantUrl = `${baseUrl}#grant-${plan.toLowerCase()}`;
+                    if (credits) {
+                        grantUrl += `-${credits}`;
+                    }
+                    dom.adminGeneratedLink.value = grantUrl;
+                    dom.adminLinkContainer.classList.remove('hidden');
+                });
+
+                dom.adminCopyLinkBtn.addEventListener('click', () => {
+                    dom.adminGeneratedLink.select();
+                    document.execCommand('copy');
+                    alert('Enlace copiado al portapapeles');
+                });
+            }
+
+            // --- INICIAR LA APLICACIÓN ---
+            init();
+        });
+    </script>
 </body>
 </html>
